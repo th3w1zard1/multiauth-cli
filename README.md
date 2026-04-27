@@ -32,7 +32,7 @@ See **[docs/INTEGRATION.md](docs/INTEGRATION.md)**. Implement a `CliAdapter` and
 
 ## Examples in this repo
 
-The **[examples/](examples/)** folder has a **mock “upstream”** and a small runner that uses the built `dist/` files. **Vendor-specific** wiring (real upstream CLIs) belongs in a **private** `local/` directory: copy the examples there, add dependencies, and add `local/` to your global gitignore (this repo already ignores it).
+The **[examples/](examples/)** folder has a **mock “upstream”** and a small runner that uses the built `dist/` files; see **[examples/README.md](examples/README.md)** for the required env vars. **Vendor-specific** wiring (real upstream CLIs) belongs in a **private** `local/` directory: copy the examples there, add dependencies, and keep `local/` gitignored (this repo already ignores it).
 
 ## Development
 
