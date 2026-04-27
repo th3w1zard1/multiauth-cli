@@ -70,10 +70,15 @@ process.exit(code);
 
 Wire your `package.json` `bin` to the compiled `my-thin-cli.js`. The repo’s **[examples/](examples/)** directory mirrors this pattern for a self-contained demo after `npm run build`.
 
+## Bundled Firecrawl wiring
+
+This package ships **`multiauth-firecrawl`** (`src/firecrawl-main.ts` + `src/adapters/firecrawl-adapter.ts`): same argv as upstream `firecrawl`, keys from `MULTIAUTH_*`, child receives one `FIRECRAWL_API_KEY` per attempt. Retries use `isRetryableApiFailure` (HTTP 4xx–style messages, rate limits, credits, etc.). On Windows, `scripts/Install-FirecrawlShim.ps1` can install a `firecrawl` command that points at this runner and prepends it to User `PATH`.
+
 ## References in this repository
 
 - `src/wrapper/run.ts` — `runClWithMultiauth`
 - `src/keys.ts` — env + file resolution
 - `src/env-config.ts` — `MULT` names and round-robin toggles
 - `src/round-robin.ts` — cross-process counter
-- `examples/` — mock upstream + runner (copy to `local/` for private vendor wiring)
+- `src/firecrawl-main.ts` / `src/adapters/firecrawl-adapter.ts` — Firecrawl CLI integration
+- `examples/` — mock upstream + runner (copy to `local/` for other vendors)
