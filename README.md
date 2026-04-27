@@ -16,17 +16,9 @@ A small, composable layer in front of **arbitrary** upstream CLIs that use **one
 
 **Limitation:** a retry is a new run of the child. Long-running or stateful work is not migrated between credentials automatically.
 
-### Windows: put wrapped `firecrawl` ahead of other PATH shims
+### Windows: wrapped `firecrawl` and PATH
 
-If another `firecrawl.ps1` or `firecrawl.cmd` appears earlier on `PATH`, run the setup script **once** (after `npm install -g multiauth-cli`, or from a clone with `npm link`):
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force   # if scripts are blocked
-irm https://raw.githubusercontent.com/th3w1zard1/multiauth-cli/main/scripts/Install-FirecrawlShim.ps1 | iex
-# or: pwsh -File .\scripts\Install-FirecrawlShim.ps1
-```
-
-It writes `%USERPROFILE%\.multiauth-cli\bin\firecrawl.cmd` (and `.ps1`) that invoke this package’s `dist\firecrawl-main.js`, then **prepends** that directory to your **User** `PATH` so it wins over older entries. Optional: `$env:MULTIAUTH_CLI_PACKAGE_ROOT = 'C:\path\to\multiauth-cli-repo'` before running the script to use a local build without a global install.
+If another `firecrawl` on `PATH` should be overridden, `scripts/Install-FirecrawlShim.ps1` writes `%USERPROFILE%\.multiauth-cli\bin\firecrawl.cmd` and `firecrawl.ps1` pointing at this package’s `dist\firecrawl-main.js`, and prepends that directory to **User** `PATH`. The agent runs this script when needed; see **AGENTS.md** for the policy: agents execute setup, not the user. Optional `MULTIAUTH_CLI_PACKAGE_ROOT` points at a repo root that already contains `dist\` (e.g. after `npm run build`).
 
 **Cursor / MCP:** the Firecrawl MCP server uses its own API key in MCP settings. It does **not** go through this wrapper; fix 403 there by updating MCP credentials or plan. Terminal `firecrawl` after the shim uses multiauth rotation.
 
