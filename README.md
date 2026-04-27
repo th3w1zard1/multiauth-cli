@@ -35,6 +35,8 @@ A small, composable layer in front of **arbitrary** upstream CLIs that use **one
 
 **Backwards compatibility:** if `MULTIAUTH_*` keys are unset, the resolver also reads **`FIRECRAWL_API_KEY`** / **`FIRECRAWL_API_KEYS`** so existing Firecrawl env still works through the wrapper.
 
+**Multiple keys (required for fallback):** put **two or more** keys in `MULTIAUTH_API_KEYS` (space- or comma-separated) or in the accounts file, or in `FIRECRAWL_API_KEYS` when using that path. A single key cannot rotate. When one key is out of credits, rate-limited, or hits 4xx/typical API errors, the next key is tried (see `src/classify.ts`).
+
 ## Integrating a CLI
 
 See **[docs/INTEGRATION.md](docs/INTEGRATION.md)**. Implement a `CliAdapter` and call `runClWithMultiauth` from the package root export or `multiauth-cli/wrapper/run`.

@@ -62,17 +62,52 @@ export function isRetryableApiFailure(
     return true;
   }
 
-  if (
-    t.includes("insufficient") ||
-    t.includes("out of credit") ||
-    t.includes("not enough credit") ||
-    t.includes("payment required") ||
-    t.includes("no credit") ||
-    t.includes("quota exceeded")
-  ) {
+  if (isCreditPlanOrAuthExhausted(t)) {
     return true;
   }
 
+  return false;
+}
+
+/**
+ * True when the upstream failed because this credential’s quota, credits, or
+ * entitlements are exhausted (or the API says to try another / pay). Used so
+ * multiauth can move to the next key in the chain.
+ */
+export function isCreditPlanOrAuthExhausted(t: string): boolean {
+  if (
+    t.includes("not enough credit") ||
+    t.includes("not enough credits")
+  ) {
+    return true;
+  }
+  if (/\bneed\s+\d+\s*,\s*have\s+0\b/u.test(t)) {
+    return true;
+  }
+  if (t.includes("out of credit") || t.includes("out of credits")) {
+    return true;
+  }
+  if (t.includes("credit exhausted") || t.includes("credits exhausted")) {
+    return true;
+  }
+  if (t.includes("exhausted") && (t.includes("credit") || t.includes("quota") || t.includes("limit"))) {
+    return true;
+  }
+  if (
+    t.includes("insufficient") ||
+    t.includes("payment required") ||
+    t.includes("no credit") ||
+    t.includes("no credits") ||
+    t.includes("zero credit") ||
+    t.includes("quota exceeded") ||
+    t.includes("credit limit") ||
+    t.includes("billing") ||
+    t.includes("over your limit") ||
+    t.includes("plan limit") ||
+    t.includes("upgrade your plan")
+  ) {
+    return true;
+  }
   return false;
 }
 

@@ -92,6 +92,11 @@ export async function runClWithMultiauth(
         console.error(
           `[${adapter.logPrefix}] retriable error; trying next key if available`,
         );
+      } else if (n > 1) {
+        console.error(
+          `[${adapter.logPrefix}] this credential failed (credits, auth, or rate limits); ` +
+            `trying key ${j + 2}/${n}. Set MULTIAUTH_VERBOSE=1 for details.`,
+        );
       }
     } finally {
       await cleanup();

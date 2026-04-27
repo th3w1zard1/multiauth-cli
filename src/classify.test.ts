@@ -22,6 +22,15 @@ describe("isRetryableApiFailure", () => {
     ).toBe(true);
   });
 
+  it("retries on Firecrawl preflight: Not enough credits (plural)", () => {
+    expect(
+      isRetryableApiFailure(
+        1,
+        "Error: Not enough credits. Need 1, have 0.",
+      ),
+    ).toBe(true);
+  });
+
   it("does not treat arbitrary errors as retriable", () => {
     expect(isRetryableApiFailure(1, "Cannot parse URL")).toBe(false);
   });

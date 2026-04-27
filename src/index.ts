@@ -8,7 +8,11 @@ export {
   DEFAULT_ACCOUNTS_FILE,
 } from "./keys.js";
 export { acquireRrStartIndex, debugResetRrState } from "./round-robin.js";
-export { hasHttpClientErrorStatus, isRetryableApiFailure } from "./classify.js";
+export {
+  hasHttpClientErrorStatus,
+  isCreditPlanOrAuthExhausted,
+  isRetryableApiFailure,
+} from "./classify.js";
 export {
   MULT,
   isRoundRobinEnabled,
