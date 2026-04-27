@@ -21,6 +21,9 @@ export function parseKeyList(s: string | undefined): string[] {
     .filter(Boolean);
 }
 
+const FC_PRIMARY = "FIRECRAWL_API_KEY";
+const FC_LIST = "FIRECRAWL_API_KEYS";
+
 function keysFromEnv(): string[] {
   const primary = process.env[MULT.primary]?.trim();
   const rest = parseKeyList(process.env[MULT.list]);
@@ -30,7 +33,15 @@ function keysFromEnv(): string[] {
     if (!out.includes(k)) out.push(k);
   }
   if (!primary && rest.length) {
-    return rest;
+    return out;
+  }
+  if (out.length === 0) {
+    const fcPrimary = process.env[FC_PRIMARY]?.trim();
+    const fcRest = parseKeyList(process.env[FC_LIST]);
+    if (fcPrimary) out.push(fcPrimary);
+    for (const k of fcRest) {
+      if (!out.includes(k)) out.push(k);
+    }
   }
   return out;
 }

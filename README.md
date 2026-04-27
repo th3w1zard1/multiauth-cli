@@ -18,7 +18,7 @@ A small, composable layer in front of **arbitrary** upstream CLIs that use **one
 
 ### Windows: wrapped `firecrawl` and PATH
 
-If another `firecrawl` on `PATH` should be overridden, `scripts/Install-FirecrawlShim.ps1` writes `%USERPROFILE%\.multiauth-cli\bin\firecrawl.cmd` and `firecrawl.ps1` pointing at this package’s `dist\firecrawl-main.js`, and prepends that directory to **User** `PATH`. The agent runs this script when needed; see **AGENTS.md** for the policy: agents execute setup, not the user. Optional `MULTIAUTH_CLI_PACKAGE_ROOT` points at a repo root that already contains `dist\` (e.g. after `npm run build`).
+`scripts/Install-FirecrawlShim.ps1` writes `%USERPROFILE%\.multiauth-cli\bin\firecrawl.cmd` and `firecrawl.ps1` that invoke `dist\firecrawl-main.js`, and prepends that directory to **User** `PATH` so it sorts **before** other shims (e.g. KPatcher, npm globals). When run from a clone, the script picks up sibling `dist\` automatically. CI / agents: `npm run verify:shim` rebuilds, writes shims, prepends **process** `PATH`, prints `Get-Command firecrawl`, and runs `firecrawl --version`. See **AGENTS.md** — agents perform install/verify, not the user.
 
 **Cursor / MCP:** the Firecrawl MCP server uses its own API key in MCP settings. It does **not** go through this wrapper; fix 403 there by updating MCP credentials or plan. Terminal `firecrawl` after the shim uses multiauth rotation.
 
@@ -32,6 +32,8 @@ If another `firecrawl` on `PATH` should be overridden, `scripts/Install-Firecraw
 | `MULTIAUTH_CONFIG_PATH` | Explicit path to accounts JSON (implies file mode) |
 | `MULTIAUTH_VERBOSE` | `1` for per-attempt key logging |
 | `MULTIAUTH_RR` | `0` to disable round-robin |
+
+**Backwards compatibility:** if `MULTIAUTH_*` keys are unset, the resolver also reads **`FIRECRAWL_API_KEY`** / **`FIRECRAWL_API_KEYS`** so existing Firecrawl env still works through the wrapper.
 
 ## Integrating a CLI
 

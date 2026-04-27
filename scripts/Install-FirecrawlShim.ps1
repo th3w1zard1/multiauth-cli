@@ -30,6 +30,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# When run from a clone (…\repo\scripts\this.ps1), prefer sibling dist\ without env vars.
+if (-not $PackageRoot) {
+  $scriptParent = Split-Path -Parent $PSCommandPath
+  $siblingDist = Join-Path (Split-Path -Parent $scriptParent) "dist\firecrawl-main.js"
+  if (Test-Path -LiteralPath $siblingDist) {
+    $PackageRoot = (Resolve-Path (Split-Path -Parent $scriptParent)).Path
+  }
+}
+
 function Get-FirecrawlMainJs {
   param([string] $Root)
   if ($Root) {

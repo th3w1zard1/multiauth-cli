@@ -13,6 +13,7 @@
 
 - This package: `multiauth-cli` — wrapper layer, `multiauth-firecrawl`, accounts helper, PowerShell PATH shim under `scripts/`.
 - Favor: run from clone or `npx` where possible; do not require global install unless the task explicitly needs it and you can perform the install in the tool shell.
+- **Firecrawl / PATH:** After changing shim or PATH logic, run `npm run build` then `npm run verify:shim`, and execute `scripts/Install-FirecrawlShim.ps1` from the repo (it auto-detects `dist\` next to `scripts\`). Reload PATH from the registry before `Get-Command firecrawl -All` and run `firecrawl --status` to prove the resolved binary is `%USERPROFILE%\.multiauth-cli\bin\…` ahead of other `firecrawl` entries and that the API still authenticates.
 
 ## Reference
 

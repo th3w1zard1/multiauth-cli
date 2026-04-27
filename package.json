@@ -25,6 +25,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
+    "verify:shim": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-FirecrawlShim.ps1",
     "prepublishOnly": "npm run test && npm run build"
   },
   "engines": {
