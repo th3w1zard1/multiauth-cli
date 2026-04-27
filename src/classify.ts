@@ -10,6 +10,10 @@ export function isRetryableApiFailure(
 
   const t = combined.toLowerCase();
 
+  if (hasHttpClientErrorStatus(t)) {
+    return true;
+  }
+
   if (
     t.includes(" 401") ||
     t.includes("status: 401") ||
@@ -29,9 +33,7 @@ export function isRetryableApiFailure(
     t.includes("status 403") ||
     t.includes("forbidden")
   ) {
-    if (looksLikeAuthOrBilling(t)) {
-      return true;
-    }
+    return true;
   }
 
   if (
@@ -74,15 +76,26 @@ export function isRetryableApiFailure(
   return false;
 }
 
-function looksLikeAuthOrBilling(t: string): boolean {
-  return (
-    t.includes("unauthorized") ||
-    t.includes("forbidden") ||
-    t.includes("key") ||
-    t.includes("token") ||
-    t.includes("permission") ||
-    t.includes("credit") ||
-    t.includes("plan") ||
-    t.includes("subscribe")
+/**
+ * True when output looks like an HTTP 400–499 client error (axios, fetch, curl, APIs).
+ * Used so the multiauth wrapper can rotate keys on auth / quota / plan / WAF responses.
+ */
+export function hasHttpClientErrorStatus(lowerCombined: string): boolean {
+  const ctx =
+    /(?:status|http|https|request|axios|fetch|curl|api|error|failed|response|code|forbidden|unauthorized|client)/u;
+  for (const line of lowerCombined.split(/\r?\n/u)) {
+    if (!ctx.test(line)) continue;
+    const m = line.match(/\b(4[0-9]{2})\b/u);
+    if (!m) continue;
+    const n = Number.parseInt(m[1]!, 10);
+    if (n >= 400 && n <= 499) return true;
+  }
+  const loose = lowerCombined.match(
+    /(?:status\s*code|statuscode|status)[\s:=]+(4[0-9]{2})\b/u,
   );
+  if (loose) {
+    const n = Number.parseInt(loose[1]!, 10);
+    if (n >= 400 && n <= 499) return true;
+  }
+  return false;
 }

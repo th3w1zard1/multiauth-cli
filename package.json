@@ -11,13 +11,15 @@
   },
   "bin": {
     "multiauth": "./dist/main.js",
-    "multiauth-accounts": "./dist/accounts-cli.js"
+    "multiauth-accounts": "./dist/accounts-cli.js",
+    "multiauth-firecrawl": "./dist/firecrawl-main.js"
   },
   "files": [
     "dist",
     "README.md",
     "docs",
-    "examples"
+    "examples",
+    "scripts"
   ],
   "scripts": {
     "build": "tsc",
@@ -40,6 +42,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/proper-lockfile": "^4.1.4",
+    "firecrawl-cli": "^1.15.2",
     "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {

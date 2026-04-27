@@ -10,4 +10,6 @@ node examples/run-upstream-mock.mjs
 
 The mock upstream only checks that a token was injected; it does not call any vendor API.
 
-For a **real** CLI (e.g. Firecrawl), copy these files into gitignored `local/`, add `firecrawl-cli` as a **local** dependency, resolve the real entry with `createRequire`, and in `prepareRun` set `FIRECRAWL_API_KEY` (and strip `FIRECRAWL_API_KEYS` / multiauth metadata) while keys still come from `MULTIAUTH_*` + optional accounts file.
+For **Firecrawl**, this package already ships `multiauth-firecrawl` (and optional PATH shims via `scripts/Install-FirecrawlShim.ps1`). Keys: `MULTIAUTH_*` only; the child sees a single `FIRECRAWL_API_KEY` per attempt.
+
+To experiment with another vendor in private, copy these files into gitignored `local/` and adapt the adapter pattern from `src/adapters/firecrawl-adapter.ts`.

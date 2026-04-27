@@ -12,8 +12,23 @@ A small, composable layer in front of **arbitrary** upstream CLIs that use **one
 - **Load spreading:** optional **round-robin** for the *first* key per new OS process (file-locked counter under `~/.cli-multiauth/round-robin/`). Disable with `MULTIAUTH_RR=0` or `CLI_MULTIAUTH_RR=0`.
 - **Failover:** on **recoverable** output (see `isRetryableApiFailure` in `src/classify.ts` or your adapter override), the wrapper re-runs the child on the next key. Each retry is a **new** child process.
 - **Library + bins:** `import` from this package, or use `multiauth` (prints pointers) and `multiauth-accounts` to edit the shared accounts JSON (names/keys; optional `email` as metadata only).
+- **Firecrawl CLI (bundled):** the `multiauth-firecrawl` command runs upstream `firecrawl-cli` with keys from `MULTIAUTH_*` mapped to `FIRECRAWL_API_KEY` per attempt. On HTTP **4xx–style** errors in stderr/stdout, the wrapper tries the **next** key when multiple keys are configured.
 
 **Limitation:** a retry is a new run of the child. Long-running or stateful work is not migrated between credentials automatically.
+
+### Windows: put wrapped `firecrawl` ahead of other PATH shims
+
+If another `firecrawl.ps1` or `firecrawl.cmd` appears earlier on `PATH`, run the setup script **once** (after `npm install -g multiauth-cli`, or from a clone with `npm link`):
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force   # if scripts are blocked
+irm https://raw.githubusercontent.com/th3w1zard1/multiauth-cli/main/scripts/Install-FirecrawlShim.ps1 | iex
+# or: pwsh -File .\scripts\Install-FirecrawlShim.ps1
+```
+
+It writes `%USERPROFILE%\.multiauth-cli\bin\firecrawl.cmd` (and `.ps1`) that invoke this package’s `dist\firecrawl-main.js`, then **prepends** that directory to your **User** `PATH` so it wins over older entries. Optional: `$env:MULTIAUTH_CLI_PACKAGE_ROOT = 'C:\path\to\multiauth-cli-repo'` before running the script to use a local build without a global install.
+
+**Cursor / MCP:** the Firecrawl MCP server uses its own API key in MCP settings. It does **not** go through this wrapper; fix 403 there by updating MCP credentials or plan. Terminal `firecrawl` after the shim uses multiauth rotation.
 
 ## Public env (no third-party prefix)
 
