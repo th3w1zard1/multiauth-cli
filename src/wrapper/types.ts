@@ -27,6 +27,11 @@ export type CliAdapter = {
   /** If omitted, uses `isRetryableApiFailure` from `classify.ts`. */
   isRetryable?: (exitCode: number, combinedOut: string) => boolean;
   /**
+   * If set, replaces `[childEntry, ...argv]` for the process spawn. Use for
+   * npx, plain CLIs, or any upstream that is not `node <script> ...args`.
+   */
+  buildSpawnArgList?: (userArgv: string[]) => string[];
+  /**
    * If set, used as the spawn `command` instead of `node` to run the upstream
    * entry (e.g. when the upstream bundle is not a plain Node script).
    */

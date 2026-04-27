@@ -1,26 +1,11 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Installs a user-local `firecrawl` shim that runs multiauth-wrapped Firecrawl CLI, and prepends it to your User PATH
-  so it wins over other `firecrawl` scripts (e.g. earlier PATH entries).
+  Legacy name: installs a user-local shim for the optional `multiauth-firecrawl` entry and prepends the bin dir to User PATH.
+  Delegates to install-shim.ps1 (same as any other Node runner).
 
-.DESCRIPTION
-  - Resolves `dist\firecrawl-main.js` from a global `multiauth-cli` install, or from MULTIAUTH_CLI_PACKAGE_ROOT.
-  - Writes `firecrawl.cmd` and `firecrawl.ps1` into -BinDir (default: %USERPROFILE%\.multiauth-cli\bin).
-  - Prepends -BinDir to the *User* PATH if missing.
-
-  Prerequisites: Node.js on PATH; `npm install -g multiauth-cli` (or `npm link` from a clone) so the runner exists.
-
-  Keys: use MULTIAUTH_API_KEY / MULTIAUTH_API_KEYS (or accounts file per README), not FIRECRAWL_API_KEYS, in the parent environment.
-
-.PARAMETER BinDir
-  Directory for the shim files. Default: $env:USERPROFILE\.multiauth-cli\bin
-
-.PARAMETER PackageRoot
-  Optional. Folder that contains dist\firecrawl-main.js (e.g. clone after npm run build). Overrides global lookup.
-
-.PARAMETER SkipPath
-  If set, only writes shims; does not modify User PATH.
+.PARAMETER BinDir, PackageRoot, SkipPath
+  See install-shim.ps1. Resolves dist\firecrawl-main.js from a clone, MULTIAUTH_CLI_PACKAGE_ROOT, or global multiauth-cli.
 #>
 param(
   [string] $BinDir = (Join-Path $env:USERPROFILE ".multiauth-cli\bin"),
@@ -29,8 +14,8 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$scriptDir = Split-Path -Parent $PSCommandPath
 
-# When run from a clone (…\repo\scripts\this.ps1), prefer sibling dist\ without env vars.
 if (-not $PackageRoot) {
   $scriptParent = Split-Path -Parent $PSCommandPath
   $siblingDist = Join-Path (Split-Path -Parent $scriptParent) "dist\firecrawl-main.js"
@@ -50,57 +35,10 @@ function Get-FirecrawlMainJs {
   $g = Join-Path $npmGlobal "multiauth-cli\dist\firecrawl-main.js"
   if (Test-Path -LiteralPath $g) { return (Resolve-Path -LiteralPath $g).Path }
   throw @"
-Could not find dist\firecrawl-main.js.
-
-Install the package globally, then re-run:
-  npm install -g multiauth-cli
-
-Or from a git clone (build + link):
-  npm install && npm run build && npm link
-
-Or set MULTIAUTH_CLI_PACKAGE_ROOT to the repo root (folder containing dist\) and re-run this script.
+Could not find dist\firecrawl-main.js (optional upstream entry).
+Install the package or build from a clone, then re-run, or set MULTIAUTH_CLI_PACKAGE_ROOT to the repo root.
 "@
 }
 
-$node = (Get-Command node -ErrorAction Stop).Source
 $runner = Get-FirecrawlMainJs -Root $PackageRoot
-
-New-Item -ItemType Directory -Path $BinDir -Force | Out-Null
-$cmdPath = Join-Path $BinDir "firecrawl.cmd"
-$cmdBody = @"
-@echo off
-"$node" "$runner" %*
-exit /b %ERRORLEVEL%
-"@
-Set-Content -LiteralPath $cmdPath -Value $cmdBody -Encoding ascii
-
-$ps1Path = Join-Path $BinDir "firecrawl.ps1"
-$ps1Body = @"
-#!/usr/bin/env pwsh
-`$ErrorActionPreference = 'Stop'
-& `"$node`" `"$runner`" @args
-exit `$LASTEXITCODE
-"@
-Set-Content -LiteralPath $ps1Path -Value $ps1Body -Encoding utf8
-
-Write-Host "Wrote shims:"
-Write-Host "  $cmdPath"
-Write-Host "  $ps1Path"
-Write-Host "Runner: $runner"
-
-if (-not $SkipPath) {
-  $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-  $normBin = (Resolve-Path -LiteralPath $BinDir).Path.TrimEnd('\')
-  $parts = $userPath -split ';' | Where-Object { $_ -and $_.Trim() }
-  $already = $parts | Where-Object { $_.TrimEnd('\') -eq $normBin }
-  if (-not $already) {
-    $newPath = "$normBin;$userPath"
-    [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
-    Write-Host "Prepended User PATH: $normBin"
-    Write-Host "Open a new terminal (or log off) so PATH picks up the change."
-  } else {
-    Write-Host "User PATH already contains $normBin"
-  }
-} else {
-  Write-Host "SkipPath: PATH not modified. Add this directory to the front of PATH yourself: $BinDir"
-}
+& (Join-Path $scriptDir "install-shim.ps1") -ShimName "firecrawl" -RunnerJs $runner -BinDir $BinDir -SkipPath:$SkipPath

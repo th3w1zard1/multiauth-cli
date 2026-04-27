@@ -12,6 +12,7 @@
   "bin": {
     "multiauth": "./dist/main.js",
     "multiauth-accounts": "./dist/accounts-cli.js",
+    "multiauth-run": "./dist/run-config-cli.js",
     "multiauth-firecrawl": "./dist/firecrawl-main.js"
   },
   "files": [
@@ -25,7 +26,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "verify:shim": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-FirecrawlShim.ps1",
+    "verify:shim": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/verify-shim.ps1",
     "prepublishOnly": "npm run test && npm run build"
   },
   "engines": {
@@ -44,8 +45,11 @@
   "license": "MIT",
   "dependencies": {
     "@types/proper-lockfile": "^4.1.4",
-    "firecrawl-cli": "^1.15.2",
-    "proper-lockfile": "^4.1.2"
+    "proper-lockfile": "^4.1.2",
+    "yaml": "^2.7.0"
+  },
+  "optionalDependencies": {
+    "firecrawl-cli": "^1.15.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

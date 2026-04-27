@@ -1,15 +1,15 @@
 # Examples
 
-After `npm run build` from the repo root:
+After `npm run build` from the repository root:
 
 ```bash
-# Required: at least one key in the multiauth chain (comma/space-separated)
+# Required: at least one key in the multiauth pool (space- or comma-separated)
 set MULTIAUTH_API_KEYS=demo-one demo-two
 node examples/run-upstream-mock.mjs
 ```
 
-The mock upstream only checks that a token was injected; it does not call any vendor API.
+The mock upstream only checks that a token was injected; it does not call a remote service.
 
-For **Firecrawl**, this package already ships `multiauth-firecrawl` (and optional PATH shims via `scripts/Install-FirecrawlShim.ps1`). Keys: `MULTIAUTH_*` only; the child sees a single `FIRECRAWL_API_KEY` per attempt.
+**Profile file:** copy **[profiles.example.yaml](profiles.example.yaml)** to `~/.config/multiauth/profiles.yaml` and replace placeholders with a real `node_module` name, a `path` entry, or an `exec` line. Then run `multiauth run --profile <name>` from a shell with pool keys in the environment.
 
-To experiment with another vendor in private, copy these files into gitignored `local/` and adapt the adapter pattern from `src/adapters/firecrawl-adapter.ts`.
+**Private or product-specific** wiring: copy this folder into gitignored `local/`, add dependencies, and use the `CliAdapter` pattern in **[docs/INTEGRATION.md](../docs/INTEGRATION.md)** (or a YAML profile only, no new code).

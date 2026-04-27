@@ -10,6 +10,13 @@ export const MULT = {
   verbose: "MULTIAUTH_VERBOSE",
   /** Set to "0" to disable round-robin. */
   rr: "MULTIAUTH_RR",
+  /**
+   * Path to YAML file defining upstream profiles (see multiauth run).
+   * Default: `~/.config/multiauth/profiles.yaml` (with XDG_CONFIG_HOME on Unix).
+   */
+  profilesFile: "MULTIAUTH_PROFILES_FILE",
+  /** Which profile in that file to use. */
+  profile: "MULTIAUTH_PROFILE",
 } as const;
 
 export const DEFAULT_ACCOUNTS_FILE = () =>

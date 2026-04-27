@@ -1,0 +1,36 @@
+# Copy to ~/.config/multiauth/profiles.yaml (or set MULTIAUTH_PROFILES_FILE) and
+# add your own profile names. Values below are structure examples only.
+version: 1
+defaults: {}
+profiles:
+  demo_node_module:
+    rr_id: demo-rr
+    log_prefix: multiauth
+    no_keys_message: "Set pool keys in env; see multiauth-cli README."
+    child:
+      primary_env: EXAMPLE_API_KEY
+      list_env: EXAMPLE_API_KEYS
+      strip_env: []
+    upstream:
+      type: node_module
+      package: some-npm-pkg
+      # main: dist/index.js   # optional if package.json main is set
+  demo_path:
+    rr_id: path-demo
+    log_prefix: multiauth
+    child:
+      primary_env: EXAMPLE_KEY
+    upstream:
+      type: path
+      file: ./node_modules/some-pkg/dist/index.js
+  demo_npx:
+    rr_id: npx-demo
+    log_prefix: multiauth
+    child:
+      primary_env: EXAMPLE_KEY
+    upstream:
+      type: exec
+      command: npx
+      args_prefix: ["-y", "some-npm-pkg"]
+    retry:
+      extra_substrings: ["rate limit", "try again later"]

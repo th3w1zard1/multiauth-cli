@@ -62,7 +62,7 @@ export function isRetryableApiFailure(
     return true;
   }
 
-  if (isCreditPlanOrAuthExhausted(t)) {
+  if (isRetriableLimitOrExhausted(t)) {
     return true;
   }
 
@@ -70,11 +70,10 @@ export function isRetryableApiFailure(
 }
 
 /**
- * True when the upstream failed because this credential’s quota, credits, or
- * entitlements are exhausted (or the API says to try another / pay). Used so
- * multiauth can move to the next key in the chain.
+ * True when the upstream output suggests this pool entry is exhausted, over
+ * a plan limit, or should be retried with the next key.
  */
-export function isCreditPlanOrAuthExhausted(t: string): boolean {
+export function isRetriableLimitOrExhausted(t: string): boolean {
   if (
     t.includes("not enough credit") ||
     t.includes("not enough credits")
@@ -109,6 +108,13 @@ export function isCreditPlanOrAuthExhausted(t: string): boolean {
     return true;
   }
   return false;
+}
+
+/**
+ * @deprecated Use `isRetriableLimitOrExhausted` (same behavior).
+ */
+export function isCreditPlanOrAuthExhausted(t: string): boolean {
+  return isRetriableLimitOrExhausted(t);
 }
 
 /**

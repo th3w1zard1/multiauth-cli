@@ -5,9 +5,22 @@ import { join, dirname } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const integrationDoc = join(here, "..", "docs", "INTEGRATION.md");
 
-const msg = `multiauth — generic CLI multiauth helpers (this command only prints this message).
+const a = process.argv[2];
+if (a === "run" || a === "r") {
+  const { runConfigMain } = await import("./run-config.js");
+  const code = await runConfigMain(process.argv);
+  process.exit(code);
+}
 
-Public API: import from your dependency’s package name, e.g.:
+const msg = `multiauth — generic CLI multiauth helpers (this message is all this command does).
+
+Subcommands:
+  run   Run an upstream from your profile file: multiauth run --profile <name> [upstream args...]
+        Also available as: multiauth-run (same behavior)
+        See profile file: $MULTIAUTH_PROFILES_FILE or default ~/.config/multiauth/profiles.yaml
+        Set MULTIAUTH_PROFILE=name to pick a default profile.
+
+Public API: import from your package name, e.g.:
   import { runClWithMultiauth } from "multiauth-cli"
   import type { CliAdapter } from "multiauth-cli/wrapper/types"
 

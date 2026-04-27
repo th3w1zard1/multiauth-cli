@@ -2,19 +2,30 @@
 
 ## No manual user steps (mandatory)
 
-**Do not** tell the user to run commands, fix PATH, run installers, or copy-paste setup blocks themselves. The human should not be asked to perform terminal work, one-off setup, or "run this once" instructions.
+**Do not** ask the person to run commands, fix `PATH`, run installers, or paste one-off setup blocks. They should not be given terminal work, one-off setup, or “run this once” handoffs.
 
-- **You** (the agent) use the terminal and tools: run `npm install`, `npm run build`, `npm test`, execute `scripts/Install-FirecrawlShim.ps1` when needed, adjust environment variables in the session, verify with `Get-Command`, and report outcomes.
-- **Exceptions:** Only when an action is impossible without human identity (e.g. typing a password into a third-party site, OAuth in browser) may you ask for the minimum human action, and only then—never for routine dev or repo setup.
+- **You** (the agent) use the tool shell: run `npm install`, `npm test`, `npm run build`, execute shims in `scripts/`, set session environment variables, verify with `Get-Command` where useful, and report what happened.
+- **Exceptions:** Only when something requires human identity (a password, OAuth in a browser) may you ask for the **minimum** human action — never for routine project setup.
 
-**Never** output sections like "What you should run", "Run this in your terminal", or imperative setup checklists for the user to follow. If documentation in the repo lists how something works, keep it **descriptive** (what the script installs, which env vars exist), not a substitute for the agent doing the work in-session.
+**Do not** emit sections like “What you should run” or checklists the human must type. Repository docs describe what scripts do; the agent is expected to run them, not the reader.
 
 ## Repository context
 
-- This package: `multiauth-cli` — wrapper layer, `multiauth-firecrawl`, accounts helper, PowerShell PATH shim under `scripts/`.
-- Favor: run from clone or `npx` where possible; do not require global install unless the task explicitly needs it and you can perform the install in the tool shell.
-- **Firecrawl / PATH:** After changing shim or PATH logic, run `npm run build` then `npm run verify:shim`, and execute `scripts/Install-FirecrawlShim.ps1` from the repo (it auto-detects `dist\` next to `scripts\`). Reload PATH from the registry before `Get-Command firecrawl -All` and run `firecrawl --status` to prove the resolved binary is `%USERPROFILE%\.multiauth-cli\bin\…` ahead of other `firecrawl` entries and that the API still authenticates.
+- Package name: `multiauth-cli` — pool + wrapper layer, `multiauth-accounts`, optional `multiauth` / `multiauth-run` and legacy bins, and generic installers under [scripts/install-shim.ps1](scripts/install-shim.ps1) and [scripts/install-shim.sh](scripts/install-shim.sh).
+- Prefer: run from a clone or `npx` where the task allows; do not require a global install unless the task really needs it and the agent can do it in the tool shell.
+- **PATH / shims:** When touching shim or PATH behavior, run `npm run build`, then `scripts/verify-shim.ps1` (or a targeted `install-shim.ps1` with concrete `-ShimName` and `-RunnerJs` arguments). Re-read user `PATH` from the process environment and confirm the intended shim is the one resolved. For a legacy `firecrawl` shim, `verify-shim` expects the related optional `optionalDependencies` entry to be present; otherwise use a `multiauth-run` or profile-based test instead.
+
+## Learned user preferences
+
+- For published documentation and package examples, keep copy generic; do not name example CLIs, credential product names, or third-party “credit” or quota product lines as if they were the core purpose of the tool.
+- Favor a stable, deterministic setup story: the same `install-shim` inputs should yield the same artifact layout and PATH outcome.
+
+## Learned workspace facts
+
+- When a wrapped process returns 4xx-style or known retriable child output, the multiauth layer is expected to try the next member of the key pool when one is available.
+- First-party setup scripts in `scripts/` are intended to be idempotent: repeat runs are safe and should not add duplicate PATH entries when the same bin directory is already in front of `PATH` for the user or session.
+- User rule alignment: a real environment with shell access—execute, do not hand setup back to the user for routine work.
 
 ## Reference
 
-- User rule alignment: a real environment with shell access—execute, don’t delegate setup to the user.
+- [README.md](README.md) and [docs/INTEGRATION.md](docs/INTEGRATION.md) for the public contract.

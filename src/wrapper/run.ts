@@ -40,6 +40,8 @@ export async function runClWithMultiauth(
 
   const childEntry = adapter.resolveChildEntry();
   const spawnCommand = adapter.getSpawnCommand?.() ?? process.execPath;
+  const spawnArgs = (argv: string[]) =>
+    adapter.buildSpawnArgList ? adapter.buildSpawnArgList(argv) : [childEntry, ...argv];
   const shouldRetry = adapter.isRetryable ?? isRetryableApiFailure;
 
   for (let j = 0; j < order.length; j++) {
@@ -57,7 +59,7 @@ export async function runClWithMultiauth(
 
       const result = await new Promise<{ code: number; combined: string }>(
         (resolve, reject) => {
-          const child = spawn(spawnCommand, [childEntry, ...argv], {
+          const child = spawn(spawnCommand, spawnArgs(argv), {
             env,
             stdio: ["inherit", "pipe", "pipe"],
             shell: false,
@@ -94,7 +96,7 @@ export async function runClWithMultiauth(
         );
       } else if (n > 1) {
         console.error(
-          `[${adapter.logPrefix}] this credential failed (credits, auth, or rate limits); ` +
+          `[${adapter.logPrefix}] this credential hit a retriable limit or recoverable child failure; ` +
             `trying key ${j + 2}/${n}. Set MULTIAUTH_VERBOSE=1 for details.`,
         );
       }

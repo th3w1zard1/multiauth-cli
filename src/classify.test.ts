@@ -16,13 +16,13 @@ describe("isRetryableApiFailure", () => {
     expect(isRetryableApiFailure(1, "Error: rate limit exceeded")).toBe(true);
   });
 
-  it("retries on insufficient / credits", () => {
+  it("retries on insufficient-entitlement style messages", () => {
     expect(
       isRetryableApiFailure(1, "Insufficient credits to complete the request"),
     ).toBe(true);
   });
 
-  it("retries on Firecrawl preflight: Not enough credits (plural)", () => {
+  it("retries on 'not enough' / need-f versus have-zero style output", () => {
     expect(
       isRetryableApiFailure(
         1,
