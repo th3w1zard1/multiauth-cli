@@ -62,7 +62,7 @@ export function isRetryableApiFailure(
     return true;
   }
 
-  if (isRetriableLimitOrExhausted(t)) {
+  if (matchesPoolExhaustionHeuristic(t)) {
     return true;
   }
 
@@ -70,10 +70,10 @@ export function isRetryableApiFailure(
 }
 
 /**
- * True when the upstream output suggests this pool entry is exhausted, over
- * a plan limit, or should be retried with the next key.
+ * Child stderr/stdout suggests the current pool entry is spent or the run should be retried with the next key.
+ * (Heuristic string matching on common third-party messages.)
  */
-export function isRetriableLimitOrExhausted(t: string): boolean {
+export function matchesPoolExhaustionHeuristic(t: string): boolean {
   if (
     t.includes("not enough credit") ||
     t.includes("not enough credits")
@@ -110,16 +110,12 @@ export function isRetriableLimitOrExhausted(t: string): boolean {
   return false;
 }
 
-/**
- * @deprecated Use `isRetriableLimitOrExhausted` (same behavior).
- */
-export function isCreditPlanOrAuthExhausted(t: string): boolean {
-  return isRetriableLimitOrExhausted(t);
-}
+/** @deprecated Use `matchesPoolExhaustionHeuristic` */
+export const isRetriableLimitOrExhausted = matchesPoolExhaustionHeuristic;
 
 /**
  * True when output looks like an HTTP 400–499 client error (axios, fetch, curl, APIs).
- * Used so the multiauth wrapper can rotate keys on auth / quota / plan / WAF responses.
+ * Used so the multiauth wrapper can try the next pool entry on common client-side HTTP status patterns in child output.
  */
 export function hasHttpClientErrorStatus(lowerCombined: string): boolean {
   const ctx =

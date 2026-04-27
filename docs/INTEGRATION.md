@@ -11,7 +11,7 @@ import type { CliAdapter } from "multiauth-cli/wrapper/types";
 
 ## Config-driven runs (no code adapter)
 
-1. Add `~/.config/multiauth/profiles.yaml` (or set `MULTIAUTH_PROFILES_FILE`). See **[examples/profiles.example.yaml](../examples/profiles.example.yaml)**.
+1. Add `~/.config/multiauth/profiles.yaml` or `profiles.toml` (or set `MULTIAUTH_PROFILES_FILE`). See **[examples/profiles.example.yaml](../examples/profiles.example.yaml)** or **[examples/profiles.example.toml](../examples/profiles.example.toml)**.
 2. Run: `multiauth run --profile <name> -- [downstream args]` or the `multiauth-run` binary. Default profile name: `MULTIAUTH_PROFILE` in the environment.
 3. Pool / accounts resolution is unchanged: `resolveKeyChainAsync` uses the same `MULTIAUTH_*` and optional JSON file as a coded adapter.
 
@@ -79,12 +79,12 @@ process.exit(code);
 
 Wire your `package.json` `bin` to the compiled `my-thin-cli.js`. The repo’s **[examples/](../examples/)** directory mirrors this pattern for a self-contained demo after `npm run build`.
 
-## Optional published bins
+## Published entry points
 
-- **`multiauth run` / `multiauth-run`** — always available; use the YAML profile file and `MULTIAUTH_PROFILE` / `--profile`.
-- **Legacy** — a separate bin may load an `optionalDependencies` child CLI. If that child is not installed, install it in your environment or use a `path` or `exec` profile instead.
+- **`multiauth run` / `multiauth-run`** — use the profile file and `MULTIAUTH_PROFILE` / `--profile`.
+- **One-shot setup** — from a clone, run `scripts/setup.ps1` (Windows) or `scripts/setup.sh` (Unix). They install dependencies, build, copy the example profile if missing, and call `install-shim` with a configurable command name (default `u`).
 
-`scripts/install-shim.ps1` and `scripts/install-shim.sh` are generic: pass any built `dist/*.js` and a shim name. The legacy `Install-FirecrawlShim.ps1` is a small helper that points at the optional `dist\firecrawl-main.js` entry and names the shim on disk.
+`scripts/install-shim.ps1` and `scripts/install-shim.sh` are generic: pass any built `dist/*.js` and a basename to install on `PATH`. See also **[docs/HOSTS.md](HOSTS.md)** for how this differs from built-in tools in an IDE.
 
 ## References in this repository
 
@@ -92,6 +92,6 @@ Wire your `package.json` `bin` to the compiled `my-thin-cli.js`. The repo’s **
 - `src/keys.ts` — env + file resolution
 - `src/env-config.ts` — `MULT` names and round-robin toggles
 - `src/round-robin.ts` — cross-process counter
-- `src/config/` — YAML load + `cliAdapterFromProfile`
+- `src/config/` — profile load (YAML or TOML) + `cliAdapterFromProfile`
 - `src/run-config.ts` — `multiauth run` / `multiauth-run`
 - `examples/` — mock upstream + example profile file

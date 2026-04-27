@@ -1,0 +1,15 @@
+# Same information as profiles.example.yaml — set MULTIAUTH_PROFILES_FILE to this path if you prefer TOML.
+version = 1
+
+[profiles.demo_toml]
+rr_id = "demo-rr"
+log_prefix = "multiauth"
+no_keys_message = "Set pool keys in env; see multiauth-cli README."
+
+[profiles.demo_toml.child]
+primary_env = "EXAMPLE_API_KEY"
+list_env = "EXAMPLE_API_KEYS"
+
+[profiles.demo_toml.upstream]
+type = "node_module"
+package = "some-npm-pkg"

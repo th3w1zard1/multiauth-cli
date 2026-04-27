@@ -7,8 +7,6 @@ const ENV_SNAPSHOT_KEYS = [
   MULT.list,
   MULT.useFile,
   MULT.path,
-  "FIRECRAWL_API_KEY",
-  "FIRECRAWL_API_KEYS",
 ] as const;
 
 function snapshotEnvs() {
@@ -48,8 +46,6 @@ describe("resolveKeyChainAsync", () => {
     delete process.env[MULT.path];
     delete process.env[MULT.primary];
     delete process.env[MULT.list];
-    delete process.env.FIRECRAWL_API_KEY;
-    delete process.env.FIRECRAWL_API_KEYS;
   });
   afterEach(() => {
     restoreEnvs(snap!);
@@ -67,13 +63,5 @@ describe("resolveKeyChainAsync", () => {
     process.env[MULT.list] = "a b";
     const { keys } = await resolveKeyChainAsync();
     expect(keys).toEqual(["a", "b"]);
-  });
-
-  it("env only: falls back to FIRECRAWL_API_KEY when MULTIAUTH unset", async () => {
-    process.env.FIRECRAWL_API_KEY = "fc1";
-    process.env.FIRECRAWL_API_KEYS = "fc2 fc3";
-    const { keys, source } = await resolveKeyChainAsync();
-    expect(source).toBe("env_only");
-    expect(keys).toEqual(["fc1", "fc2", "fc3"]);
   });
 });

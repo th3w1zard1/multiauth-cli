@@ -10,8 +10,8 @@ export {
 export { acquireRrStartIndex, debugResetRrState } from "./round-robin.js";
 export {
   hasHttpClientErrorStatus,
-  isCreditPlanOrAuthExhausted,
   isRetriableLimitOrExhausted,
+  matchesPoolExhaustionHeuristic,
   isRetryableApiFailure,
 } from "./classify.js";
 export {

@@ -1,6 +1,6 @@
 # Multiauth CLI (`multiauth-cli`)
 
-A small, composable layer in front of **arbitrary** upstream command-line tools that use **one credential at a time** (API keys, tokens, or anything you map into a child `process.env`). You keep the upstream program unchanged; the wrapper **picks a credential from a pool** per run, can **round-robin** under parallel use, and on **recoverable** process output can **retry the same arguments** with the next credential. Full wiring can be declared in a **YAML profile file** so the same install can target different child CLIs without code forks.
+A small, composable layer in front of **arbitrary** upstream command-line tools that use **one credential at a time** (API keys, tokens, or anything you map into a child `process.env`). You keep the upstream program unchanged; the wrapper **picks a credential from a pool** per run, can **round-robin** under parallel use, and on **recoverable** process output can **retry the same arguments** with the next pool entry. Full wiring can be declared in a **YAML or TOML profile file** so the same install can target different child CLIs without code forks.
 
 **Use this when** you have multiple org accounts, keys, or “slots,” and you want a single, familiar process surface: same flags as the upstream, with load spreading and automatic failover at the process boundary.
 
@@ -11,21 +11,28 @@ A small, composable layer in front of **arbitrary** upstream command-line tools 
 - **Key chain:** `MULTIAUTH_API_KEY` / `MULTIAUTH_API_KEYS`, optional JSON accounts when `MULTIAUTH_CONFIG=1` or `MULTIAUTH_CONFIG_PATH` is set (default file: `~/.cli-multiauth/accounts.json`).
 - **Load spreading:** optional **round-robin** for the *first* key in each new OS process (file-locked counter under `~/.cli-multiauth/round-robin/`). Disable with `MULTIAUTH_RR=0` or `CLI_MULTIAUTH_RR=0`.
 - **Failover:** on **recoverable** child output (see `isRetryableApiFailure` in the published API, or a profile-specific override), the wrapper re-runs the child with the **next** key. Each try is a **new** process.
-- **Profile file (YAML):** set `MULTIAUTH_PROFILES_FILE` or use the default `~/.config/multiauth/profiles.yaml` (respects `XDG_CONFIG_HOME` on non-Windows). List named profiles: upstream (Node module, path, or `exec` prefix), child environment variable for the key, and optional **extra** substrings to treat as retriable. See **[examples/profiles.example.yaml](examples/profiles.example.yaml)**.
-- **Run:** `multiauth run --profile <name> [upstream args...]`, or the `multiauth-run` binary, or an optional legacy bin that targets one optional `optionalDependencies` CLIs. Set `MULTIAUTH_PROFILE` to default the profile.
+- **Profile file (YAML or TOML):** set `MULTIAUTH_PROFILES_FILE` or use the default `~/.config/multiauth/profiles.yaml` (respects `XDG_CONFIG_HOME` on non-Windows; use a `.toml` path if you prefer). List named profiles: upstream (Node module, path, or `exec` prefix), child environment variable for the key, and optional **extra** substrings to treat as retriable. See **[examples/profiles.example.yaml](examples/profiles.example.yaml)** and **[examples/profiles.example.toml](examples/profiles.example.toml)**.
+- **Run:** `multiauth run --profile <name> [upstream args...]`, or the `multiauth-run` binary. Set `MULTIAUTH_PROFILE` to default the profile.
 - **Library + helpers:** `import` from the package, `multiauth-accounts` for the shared accounts JSON (names, keys, optional `email` metadata), and the core API in **[docs/INTEGRATION.md](docs/INTEGRATION.md)**.
 
 **Limitation:** a retry is a new run of the child. Long-running or stateful work is not moved between pool entries automatically.
 
-### IDE / MCP and your terminal
+### Host tools vs shell
 
-Remote editors may run separate helper processes with their own key configuration. Those paths are separate from a shell where you have installed a **local PATH shim** for this package. A problem in the IDE’s helper is fixed in the IDE, not by changes here.
+Editor-embedded or other **host** processes that call remote APIs **directly** do not use a PATH shim from this package. See **[docs/HOSTS.md](docs/HOSTS.md)**. Only **spawned** CLIs (profile-driven `multiauth run` or a shim) get pool + retry behavior here.
 
-### Windows: PATH shims (deterministic)
+### One-shot setup (same result every time)
 
-[scripts/install-shim.ps1](scripts/install-shim.ps1) writes a stable pair of shims in a user bin directory (by default `%USERPROFILE%\.multiauth-cli\bin\`) and prepends that path to the **user** `PATH` only when the directory is not already first. The same command line produces the same files. From a repository clone, run it after `npm run build` and point `-RunnerJs` at any built entry under `dist\` (e.g. `run-config-cli.js` for profile-based runs). **AGENTS.md** in this repository expects the agent to perform install/verify in the tool shell, not a human to copy steps.
+From a repository clone, after any pull:
 
-A Bash variant with the same file-content contract is [scripts/install-shim.sh](scripts/install-shim.sh) (suitable for Git Bash / WSL / macOS / Linux). CI can run `npm run verify:shim` to rebuild, create the legacy `firecrawl` shim, prepend process `PATH`, and exercise `--version` on the shim; that check requires the optional `optionalDependencies` child CLI to be present for that specific legacy path.
+- **Windows:** `pwsh -NoProfile -File scripts/setup.ps1` (optional: `-ShimName mycmd` to choose the command name on your `PATH`, default `u`)
+- **Unix:** `bash scripts/setup.sh` (optional second arg: shim name)
+
+These run `npm install`, `npm run build`, copy `examples/profiles.example.yaml` to the default config path if missing, and call [scripts/install-shim.ps1](scripts/install-shim.ps1) or [scripts/install-shim.sh](scripts/install-shim.sh). Edit the profile file: set `upstream` to a `node_module` (any npm package that exposes a Node entry), `path`, or `exec`, and map `child.primary_env` to the env var your downstream reads for the active pool entry.
+
+[scripts/install-shim.ps1](scripts/install-shim.ps1) writes a stable pair of shims in `%USERPROFILE%\.multiauth-cli\bin\` (or your `-BinDir`) and prepends **User** `PATH` when that directory is not already present. The same inputs yield the same files. **AGENTS.md** expects the agent to run these in the tool shell for routine setup.
+
+A Bash variant with the same on-disk contract is [scripts/install-shim.sh](scripts/install-shim.sh). CI: `npm run verify:shim` rebuilds, installs a test shim (default name `u`), prepends `PATH`, and runs `u --help`.
 
 ## Public environment (unprefixed pool)
 
@@ -37,10 +44,8 @@ A Bash variant with the same file-content contract is [scripts/install-shim.sh](
 | `MULTIAUTH_CONFIG_PATH` | Explicit path to the accounts JSON (implies file mode) |
 | `MULTIAUTH_VERBOSE` | `1` for per-attempt key logging |
 | `MULTIAUTH_RR` | `0` to disable round-robin |
-| `MULTIAUTH_PROFILES_FILE` | Path to the YAML profile file (see above) |
+| `MULTIAUTH_PROFILES_FILE` | Path to the profile file (`.yaml` / `.yml` / `.toml`) |
 | `MULTIAUTH_PROFILE` | Default profile name for `multiauth run` |
-
-**Compatibility (pool only):** if the primary `MULTIAUTH_*` keys are not set, the key resolver can read from other env names in use on existing machines. See the source in `src/keys.ts` if you need the exact list.
 
 **Multiple pool entries (required for rotation):** put at least two keys in `MULTIAUTH_API_KEYS` (or comma- or space-separated) or the accounts file. A single key cannot advance the pool. When a pool entry is exhausted, rate-limited, or the child output matches retriable patterns, the next key is used (classifier in `src/classify.ts`, plus profile `retry.extra_substrings` when set).
 

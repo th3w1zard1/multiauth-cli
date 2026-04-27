@@ -1,6 +1,6 @@
 /**
- * On-disk profile file (YAML), version 1.
- * See examples/profiles.example.yaml
+ * On-disk profile file (YAML or TOML), version 1.
+ * See examples/profiles.example.yaml and examples/profiles.example.toml
  */
 export type UpstreamNodeModule = {
   type: "node_module";

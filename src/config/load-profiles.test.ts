@@ -40,6 +40,30 @@ profiles:
       file: "/tmp/x.js",
     });
   });
+
+  it("loads TOML with the same shape", async () => {
+    const f = join(dir, "p.toml");
+    await writeFile(
+      f,
+      `
+version = 1
+
+[profiles.b]
+rr_id = "r2"
+log_prefix = "t"
+
+[profiles.b.child]
+primary_env = "K1"
+
+[profiles.b.upstream]
+type = "path"
+file = "/tmp/y.js"
+`,
+      "utf8",
+    );
+    const d = await loadProfilesFile(f);
+    expect(d.profiles.b.rr_id).toBe("r2");
+  });
 });
 
 describe("parseRunArgs", () => {

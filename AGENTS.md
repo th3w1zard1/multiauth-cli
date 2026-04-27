@@ -11,9 +11,9 @@
 
 ## Repository context
 
-- Package name: `multiauth-cli` — pool + wrapper layer, `multiauth-accounts`, optional `multiauth` / `multiauth-run` and legacy bins, and generic installers under [scripts/install-shim.ps1](scripts/install-shim.ps1) and [scripts/install-shim.sh](scripts/install-shim.sh).
+- Package name: `multiauth-cli` — pool + wrapper layer, `multiauth-accounts`, `multiauth` / `multiauth-run`, and generic installers [scripts/install-shim.ps1](scripts/install-shim.ps1), [scripts/install-shim.sh](scripts/install-shim.sh), [scripts/setup.ps1](scripts/setup.ps1), [scripts/setup.sh](scripts/setup.sh).
 - Prefer: run from a clone or `npx` where the task allows; do not require a global install unless the task really needs it and the agent can do it in the tool shell.
-- **PATH / shims:** When touching shim or PATH behavior, run `npm run build`, then `scripts/verify-shim.ps1` (or a targeted `install-shim.ps1` with concrete `-ShimName` and `-RunnerJs` arguments). Re-read user `PATH` from the process environment and confirm the intended shim is the one resolved. For a legacy `firecrawl` shim, `verify-shim` expects the related optional `optionalDependencies` entry to be present; otherwise use a `multiauth-run` or profile-based test instead.
+- **PATH / shims:** When touching shim or PATH behavior, run `npm run build`, then `scripts/verify-shim.ps1` (or a targeted `install-shim.ps1` with concrete `-ShimName` and `-RunnerJs` arguments). Re-read user `PATH` from the process environment and confirm the intended shim is the one resolved. `verify-shim` uses `run-config-cli.js` and `multiauth-run --help` by default.
 
 ## Learned user preferences
 

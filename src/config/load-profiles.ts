@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
+import toml from "toml";
 import { parse as parseYaml } from "yaml";
 
 import type { ProfilesFileV1, ProfileSpecV1, UpstreamSpec } from "./profiles-types.js";
@@ -145,11 +146,19 @@ export async function loadProfilesFile(
       e,
     );
   }
+  const lower = filePath.toLowerCase();
   let doc: unknown;
   try {
-    doc = parseYaml(raw);
+    if (lower.endsWith(".toml") || lower.endsWith(".tml")) {
+      doc = toml.parse(raw) as unknown;
+    } else {
+      doc = parseYaml(raw);
+    }
   } catch (e) {
-    throw new ProfileLoadError(`Invalid YAML in ${filePath}`, e);
+    throw new ProfileLoadError(
+      `Invalid ${lower.endsWith(".toml") || lower.endsWith(".tml") ? "TOML" : "YAML"} in ${filePath}`,
+      e,
+    );
   }
   if (!isRecord(doc)) {
     throw new ProfileLoadError(`Top-level value in ${filePath} must be a mapping`);

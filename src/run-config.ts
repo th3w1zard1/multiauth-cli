@@ -2,8 +2,20 @@
 import { runClWithMultiauth } from "./wrapper/run.js";
 import { cliAdapterFromProfile } from "./config/adapter-profile.js";
 import { loadProfilesFile, ProfileLoadError } from "./config/load-profiles.js";
-import { resolveProfilesFilePath } from "./config/paths.js";
+import { defaultProfilesYamlPath, resolveProfilesFilePath } from "./config/paths.js";
 import { MULT } from "./env-config.js";
+
+function printRunHelp(): void {
+  const def = defaultProfilesYamlPath();
+  process.stdout.write(
+    `Usage: multiauth run --profile <name> [upstream args...]\n` +
+      `       multiauth-run --profile <name> [upstream args...]\n\n` +
+      `Environment:\n` +
+      `  ${MULT.profile}     Default profile name (optional if --profile is set)\n` +
+      `  ${MULT.profilesFile}  Profile file (default: ${def}; also .toml supported)\n` +
+      `  ${MULT.primary}, ${MULT.list}, ...  — see README (key pool)\n`,
+  );
+}
 
 /**
  * Parse `argv` after the `run` subcommand: supports `--profile <name>`, `-p <name>`.
@@ -51,6 +63,10 @@ export async function runConfigMain(argv: string[] = process.argv): Promise<numb
   const args = argv.slice(2);
   if (args[0] === "run") {
     args.shift();
+  }
+  if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
+    printRunHelp();
+    return 0;
   }
   let parsed: { profile: string; rest: string[] };
   try {
