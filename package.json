@@ -1,0 +1,50 @@
+{
+  "name": "multiauth-cli",
+  "version": "0.1.0",
+  "description": "Pluggable multiauth layer for any CLI: round-robin, failover, optional accounts file + helper",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./wrapper/run": "./dist/wrapper/run.js",
+    "./wrapper/types": "./dist/wrapper/types.js"
+  },
+  "bin": {
+    "multiauth": "./dist/main.js",
+    "multiauth-accounts": "./dist/accounts-cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs",
+    "examples"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "cli",
+    "multiauth",
+    "api-key",
+    "key-rotation",
+    "load-balance",
+    "wrapper",
+    "pluggable-adapter"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/proper-lockfile": "^4.1.4",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules
+dist
+*.tgz
+.env
+coverage
+.DS_Store
+local/
+.history/
+.cursor/
+.vscode/
