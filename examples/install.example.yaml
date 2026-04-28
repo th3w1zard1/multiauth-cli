@@ -1,0 +1,53 @@
+# Declarative install for scripts/apply-install.mjs (or `setup.ps1 -Config` / `setup.sh --config`).
+# Copy to install.yaml at the repo root or pass -Config. Same keys each run → same on-disk result.
+
+version: 1
+
+# Optional: default "." (CWD at invoke time or passed as argv).
+package_root: "."
+
+# Built runner the shims call (path relative to package_root).
+runner: "dist/run-config-cli.js"
+
+# If copy_example… is true and dest is missing, copy the example into dest.
+# Default dest: ~/.config/multiauth/profiles.yaml (XDG: $XDG_CONFIG_HOME on Unix).
+profiles:
+  copy_example_if_missing: true
+  example: "examples/profiles.example.yaml"
+  dest: null
+
+# Shims: each entry creates one command in bin_dir. All use `runner` unless a shim sets `runner`.
+# Names should be what you type instead of `multiauth-run` (not platform extensions).
+shims:
+  - name: u
+  # - name: mywrap
+
+# null = per-OS default: %USERPROFILE%\.multiauth-cli\bin (Windows) or ~/.multiauth-cli/bin (Unix)
+bin_dir: null
+
+# PATH: Windows User PATH is updated only when `prepend` (via install-shim.ps1). Unix: `prepend` writes
+# a small path-export file under the config dir (source it from your shell, or add one line to PATH);
+# `skip` leaves only shims in bin_dir.
+path:
+  mode: prepend
+  # only used for Unix + prepend: where to write path-export (relative to $HOME is wrong here — use
+  # default under ~/.config/multiauth/path-export.sh when null)
+  unix_path_export: null
+
+# Optional Cursor / workspace artifacts (templates, not a substitute for MCP process env — see docs/INSTALL.md).
+# When enabled, set rule / plan / mcp .enabled to true to emit those files (see docs/INSTALL.md).
+cursor:
+  enabled: false
+  out_dir: ".cursor/multiauth"
+  rule:
+    enabled: false
+    template: "examples/cursor/rule.example.mdc"
+    dest: null
+  plan:
+    enabled: false
+    template: "examples/cursor/plan.example.md"
+    dest: null
+  mcp:
+    enabled: false
+    template: "examples/cursor/mcp-handoff.example.md"
+    dest: null

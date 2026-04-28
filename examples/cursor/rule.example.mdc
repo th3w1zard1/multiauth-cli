@@ -1,0 +1,14 @@
+---
+description: When spawning a CLI that uses a pool + retry profile, prefer the installed multiauth wrapper
+globs: "*"
+---
+
+# Spawning child CLIs with a profile
+
+When a task must run a **Node-packaged** upstream CLI and you are using **multiauth-cli** with a **profile file** (YAML/TOML under the user config path or `MULTIAUTH_PROFILES_FILE`):
+
+- Prefer invoking the same entry as a human would: the **PATH shim** the install script created (or `npx multiauth-run` / `node <repo>/dist/run-config-cli.js`) and pass the **same arguments** the upstream would accept.
+- Set `MULTIAUTH_PROFILE` (or `--profile`) to the profile name for that child CLI.
+- Do not assume editor MCP or built-in search tools are wrapped; those are separate host processes. See the project `docs/HOSTS.md` if a task mixes terminal runs and tool APIs.
+
+This rule file is generated for convenience; it does not change IDE-hosted MCP or extension behavior.

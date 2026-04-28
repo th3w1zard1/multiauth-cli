@@ -1,0 +1,27 @@
+# Example profile: run the public `firecrawl-cli` package under multiauth (key pool + retry)
+# and keep the child’s real env as FIRECRAWL_API_KEY. Install the CLI in this repo: `npm i -D firecrawl-cli`
+# and copy this file into your default profile path, or set MULTIAUTH_PROFILES_FILE to this path.
+# Never commit real keys — use env or multiauth-accounts / accounts file.
+
+version: 1
+defaults: {}
+profiles:
+  fc_search:
+    rr_id: firecrawl-search
+    log_prefix: multiauth:fc
+    no_keys_message: "Set MULTIAUTH_API_KEY / MULTIAUTH_API_KEYS (mapped to FIRECRAWL_API_KEY) or a JSON accounts file; see docs/guides/wrap-firecrawl-search.md."
+    child:
+      primary_env: FIRECRAWL_API_KEY
+    upstream:
+      type: node_module
+      package: firecrawl-cli
+      # Resolves the package "main" (usually dist/index.js); override if your layout differs.
+
+    retry:
+      extra_substrings:
+        - "rate limit"
+        - "429"
+        - "credits"
+        - "unauthorized"
+        - "insufficient"
+        - "try again"
