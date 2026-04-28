@@ -1,0 +1,13 @@
+# Smallest install: one shim, no default profile copy, do not change User PATH (idempotent in CI).
+# Usage: after build, `node scripts/apply-install.mjs examples/install.minimal.example.yaml`
+version: 1
+package_root: "."
+path:
+  mode: skip
+profiles:
+  copy_example_if_missing: false
+shims:
+  - name: multiauth_smoke
+
+cursor:
+  enabled: false

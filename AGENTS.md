@@ -11,7 +11,7 @@
 
 ## Repository context
 
-- Package name: `multiauth-cli` — pool + wrapper layer, `multiauth-accounts`, `multiauth` / `multiauth-run`, and generic installers [scripts/install-shim.ps1](scripts/install-shim.ps1), [scripts/install-shim.sh](scripts/install-shim.sh), [scripts/setup.ps1](scripts/setup.ps1), [scripts/setup.sh](scripts/setup.sh).
+- Package name: `multiauth-cli` — pool + wrapper layer, `multiauth-accounts`, `multiauth` / `multiauth-run`, and generic installers [scripts/install-shim.ps1](scripts/install-shim.ps1), [scripts/install-shim.sh](scripts/install-shim.sh), [scripts/setup.ps1](scripts/setup.ps1), [scripts/setup.sh](scripts/setup.sh), optional YAML-driven [scripts/apply-install.mjs](scripts/apply-install.mjs) + [scripts/uninstall.mjs](scripts/uninstall.mjs) (see [docs/INSTALL.md](docs/INSTALL.md)).
 - Prefer: run from a clone or `npx` where the task allows; do not require a global install unless the task really needs it and the agent can do it in the tool shell.
 - **PATH / shims:** When touching shim or PATH behavior, run `npm run build`, then `scripts/verify-shim.ps1` (or a targeted `install-shim.ps1` with concrete `-ShimName` and `-RunnerJs` arguments). Re-read user `PATH` from the process environment and confirm the intended shim is the one resolved. `verify-shim` uses `run-config-cli.js` and `multiauth-run --help` by default.
 

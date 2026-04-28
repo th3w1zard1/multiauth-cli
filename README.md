@@ -27,8 +27,9 @@ From a repository clone, after any pull:
 
 - **Windows:** `pwsh -NoProfile -File scripts/setup.ps1` (optional: `-ShimName mycmd` to choose the command name on your `PATH`, default `u`)
 - **Unix:** `bash scripts/setup.sh` (optional second arg: shim name)
+- **Declarative (multi-shim, optional Cursor files, state for uninstall):** [examples/install.example.yaml](examples/install.example.yaml) and [docs/INSTALL.md](docs/INSTALL.md) — e.g. `setup.ps1 -Config path\\to\\install.yaml` or `bash scripts/setup.sh --config path/to/install.yaml`. Uninstall: [scripts/uninstall.mjs](scripts/uninstall.mjs) (or `uninstall.ps1` / `uninstall.sh`).
 
-These run `npm install`, `npm run build`, copy `examples/profiles.example.yaml` to the default config path if missing, and call [scripts/install-shim.ps1](scripts/install-shim.ps1) or [scripts/install-shim.sh](scripts/install-shim.sh). Edit the profile file: set `upstream` to a `node_module` (any npm package that exposes a Node entry), `path`, or `exec`, and map `child.primary_env` to the env var your downstream reads for the active pool entry.
+The classic flow runs `npm install`, `npm run build`, copies `examples/profiles.example.yaml` to the default config path if missing, and calls [scripts/install-shim.ps1](scripts/install-shim.ps1) or [scripts/install-shim.sh](scripts/install-shim.sh). Edit the profile file: set `upstream` to a `node_module` (any npm package that exposes a Node entry), `path`, or `exec`, and map `child.primary_env` to the env var your downstream reads for the active pool entry.
 
 [scripts/install-shim.ps1](scripts/install-shim.ps1) writes a stable pair of shims in `%USERPROFILE%\.multiauth-cli\bin\` (or your `-BinDir`) and prepends **User** `PATH` when that directory is not already present. The same inputs yield the same files. **AGENTS.md** expects the agent to run these in the tool shell for routine setup.
 
@@ -55,7 +56,7 @@ See **[docs/INTEGRATION.md](docs/INTEGRATION.md)**. Implement a `CliAdapter` and
 
 ## Examples in this repository
 
-**[examples/](examples/)** contains a **mock** upstream and a small runner. **[examples/profiles.example.yaml](examples/profiles.example.yaml)** shows a generic profile file shape. Proprietary or product-specific recipes belong in a **private** `local/` directory: copy the examples, add your own `package.json` and wiring, and keep `local/` gitignored if needed.
+**[examples/](examples/)** contains a **mock** upstream and a small runner. **[examples/profiles.example.yaml](examples/profiles.example.yaml)** shows a generic profile file shape. For a full walkthrough that uses a public CLI to run **`search`** (install, profile, keys, and troubleshooting), see **[docs/guides/wrap-firecrawl-search.md](docs/guides/wrap-firecrawl-search.md)**. Proprietary or one-off recipes can still live in a private `local/` directory: copy the examples, add your own `package.json` and wiring, and keep `local/` gitignored if needed. The `firecrawl-cli` package is listed only as a **devDependency** for that documented flow and local e2e checks, not a runtime requirement of the library.
 
 ## Development
 
